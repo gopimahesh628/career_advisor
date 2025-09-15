@@ -11,7 +11,11 @@ from django.conf import settings
 from .utils import CustomSignUpForm
 from .models import ChatSession, ChatMessage, UserProfile, QuizQuestion, QuizResult
 from openai import OpenAI 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # set your API key in .env
+# backend/views.py
+from ai_models.resume_parser import extract_skills
+from ai_models.career_matcher import match_careers
+from ai_models.progress_tracker import track_progress
+client = OpenAI(api_key=os.getenv("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"))  # set your API key in .env
 
 @csrf_exempt
 def ask_gpt(request):
