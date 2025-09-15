@@ -1,0 +1,369 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Career Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* General body and layout */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensures body is at least the viewport height */
+        }
+
+        /* The container for the main content that grows */
+        .main-content-area {
+            display: flex;
+            flex: 1; /* Allows this container to grow and push the footer down */
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+
+        /* The left sidebar container for the menu */
+        .left-sidebar {
+            width: 260px;
+            background-color: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transform: translateX(-100%); /* Initially off-screen */
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .left-sidebar.active {
+            transform: translateX(0); /* Slides into view */
+        }
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            color: #bac8e0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .sidebar-nav a:hover {
+            background-color: #3b3c3f;
+        }
+        .sidebar-footer-nav {
+            padding: 20px;
+            border-top: 1px solid #444;
+        }
+        .sidebar-footer-nav a {
+            display: block;
+            padding: 10px 0;
+            color: #bac8e0;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar-footer-nav a:hover {
+            color: white;
+        }
+        
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: linear-gradient(90deg, #6a85b6 0%, #bac8e0 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 101;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .profile-btn {
+            padding: 12px;
+            background-color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .profile-btn img {
+            height: 25px;
+            width: 25px;
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: #202123;
+            color: #bac8e0;
+            padding: 40px 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        footer .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+        footer h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        footer a {
+            color: #bac8e0;
+            text-decoration: none;
+            margin-bottom: 5px;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+
+        /* Quiz styles */
+        .quiz-container { 
+            max-width: 700px; 
+            margin: auto; 
+            padding: 20px; 
+            background: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 0 8px rgba(0,0,0,0.1); 
+        }
+        h2 { text-align: center; color: #333; }
+        .question { font-weight: bold; margin: 15px 0; }
+        .options label { display: block; margin: 5px 0; padding: 6px; border-radius: 4px; cursor: pointer; }
+        .options input { margin-right: 8px; }
+        .btn { margin-top: 20px; padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-size: 16px; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        #result { margin-top: 25px; padding: 15px; border-radius: 8px; display: none; }
+        #result.success { background: #e6ffed; border: 1px solid #00c851; color: #155724; }
+        #result.error { background: #ffe6e6; border: 1px solid #ff4444; color: #721c24; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h1>Career Advisor</h1>
+        </div>
+        <a class="profile-btn" href="{% url 'user_profile' %}">
+            <img src="{% static 'images/user-icon.svg' %}" alt="User Profile Icon">
+        </a>
+    </header>
+
+    <div class="left-sidebar" id="left-sidebar">
+        <div class="sidebar-header">
+            <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{% url 'quiz_page' %}">Quiz</a>
+            <a href="{% url 'career_guide' %}">Career Guide</a>
+            <a href="#">Learning Plan</a>
+            <a href="#">College Compass</a>
+            <a href="#">Passion Hub</a>
+            <a href="#">Brain Breaks</a>
+            <a href="#">Skill Up</a>
+        </div>
+        <div class="sidebar-footer-nav">
+            <a href="#">Settings</a>
+            <a href="#">Help</a>
+            <a href="#">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-content-area">
+        <div class="quiz-container">
+            <h2>🎯 Career Guidance Quiz</h2>
+            <div id="quiz"></div>
+            <button class="btn btn-primary" type="button" onclick="submitQuiz()">Submit Quiz</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-section">
+            <h3>About Career Advisor</h3>
+            <p>Your guide to a brighter professional future.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Contact Us</h3>
+            <p>Email: <a href="mailto:info@careeradvisor.com">info@careeradvisor.com</a></p>
+            <p>Phone: (123) 456-7890</p>
+        </div>
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <span id="current-year"></span> Career Advisor. All Rights Reserved. | <span id="current-time"></span></p>
+        </div>
+    </footer>
+
+    <script>
+        // Fetch userProfile stored from chatbot
+        let userProfile = JSON.parse(localStorage.getItem("userProfile")) || {};
+
+        // Quiz questions dynamically generated
+        let questions = [];
+
+        if (userProfile.study && userProfile.study.toLowerCase().includes("engineering")) {
+            questions.push({
+                q: "Which subject do you enjoy the most?",
+                options: ["Mathematics", "Physics", "Computer Science", "Electronics"],
+                field: ["Data Science", "Mechanical", "Software Engineering", "Electronics Engineering"]
+            });
+        } else if (userProfile.study && userProfile.study.toLowerCase().includes("arts")) {
+            questions.push({
+                q: "Which activity excites you more?",
+                options: ["Painting", "Writing", "Music", "Drama"],
+                field: ["Fine Arts", "Literature", "Music", "Theatre"]
+            });
+        } else {
+            questions.push({
+                q: "Do you enjoy solving logical problems?",
+                options: ["Yes, very much", "Sometimes", "Not really"],
+                field: ["STEM Careers", "General Careers", "Creative Fields"]
+            });
+        }
+
+        // General questions
+        questions.push({
+            q: "Do you prefer working with people or technology?",
+            options: ["People", "Technology", "Both"],
+            field: ["Management", "Engineering", "Hybrid Careers"]
+        });
+
+        questions.push({
+            q: "Do you like research and analysis?",
+            options: ["Yes", "No", "Sometimes"],
+            field: ["Research", "Hands-on Careers", "Flexible Roles"]
+        });
+
+        // Render quiz
+        let quizDiv = document.getElementById("quiz");
+        questions.forEach((q, index) => {
+            let html = `<div class="question">${index + 1}. ${q.q}</div><div class="options">`;
+            q.options.forEach((opt, i) => {
+                html += `<label><input type="radio" name="q${index}" value="${q.field[i]}"> ${opt}</label>`;
+            });
+            html += "</div>";
+            quizDiv.innerHTML += html;
+        });
+
+        // Handle quiz submit (frontend only)
+        function submitQuiz() {
+            let answers = {};
+            let recommended = {};
+
+            questions.forEach((q, i) => {
+                let selected = document.querySelector(`input[name="q${i}"]:checked`);
+                if (selected) {
+                    let value = selected.value;
+                    answers[`Q${i+1}`] = value;
+                    recommended[value] = (recommended[value] || 0) + 1;
+                }
+            });
+
+            if (Object.keys(answers).length === 0) {
+                alert("⚠️ Please answer at least one question!");
+                return;
+            }
+
+            let bestMatch = Object.keys(recommended).reduce((a, b) => recommended[a] > recommended[b] ? a : b);
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.className = "success";
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = `
+                <h3>✅ Quiz Completed!</h3>
+                <p>Based on your answers, we recommend you explore:</p>
+                <p><b style="color:green;">${bestMatch}</b></p>
+            `;
+        }
+
+        function toggleSidebar() {
+            const body = document.body;
+            const sidebar = document.getElementById('left-sidebar');
+            body.classList.toggle('sidebar-open');
+            sidebar.classList.toggle('active');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const yearElement = document.getElementById('current-year');
+            const timeElement = document.getElementById('current-time');
+            if (yearElement) yearElement.textContent = year;
+            if (timeElement) timeElement.textContent = timeString;
+        }
+        
+        window.onload = () => {
+            // Initial call to set the time immediately
+            updateTime();
+            // Update the time every second
+            setInterval(updateTime, 1000);
+        };
+    </script>
+</body>
+</html>

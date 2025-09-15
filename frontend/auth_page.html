@@ -1,0 +1,198 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Career Advisor - Login/Signup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Nunito', sans-serif;
+      height: 100vh;
+      display: flex;
+    }
+
+    /* Left side with image */
+    .left-side {
+      flex: 1;
+      background: url("{% static 'imgs/1.jpg' %}") no-repeat center center;
+      background-size: cover;
+    }
+
+    /* Right side with auth box */
+    .right-side {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 380px;
+      padding: 40px 30px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .form-container h2 {
+      font-size: 28px;
+      margin-bottom: 25px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #555;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: #007bff;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .form-footer {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .form-footer a {
+      color: #007bff;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Tabs for switching */
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons button {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      background: #f2f2f2;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tab-buttons button.active {
+      background: #007bff;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="left-side"></div>
+
+  <div class="right-side">
+    <div class="form-container">
+      <div class="tab-buttons">
+        <button id="login-tab" class="active" onclick="showLogin()">Login</button>
+        <button id="signup-tab" onclick="showSignup()">Sign Up</button>
+      </div>
+
+      <!-- Login Form -->
+      <form method="post" id="login-form">
+        {% csrf_token %}
+        <h2>Login</h2>
+        <div class="form-group">
+          <label for="id_username_login">Username</label>
+          <input type="text" name="{{ login_form.username.name }}" id="id_username_login" required>
+        </div>
+        <div class="form-group">
+          <label for="id_password_login">Password</label>
+          <input type="password" name="{{ login_form.password.name }}" id="id_password_login" required>
+        </div>
+        <button type="submit" name="login_submit">Login</button>
+        <div class="form-footer">
+          <a href="#">Forgot Password?</a> | <a href="#" onclick="showSignup()">Sign Up</a>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form method="post" id="signup-form" style="display:none;">
+        {% csrf_token %}
+        <h2>Sign Up</h2>
+        <div class="form-group">
+          <label for="id_username_signup">Username</label>
+          <input type="text" name="{{ signup_form.username.name }}" id="id_username_signup" required>
+        </div>
+        <div class="form-group">
+          <label for="id_email_signup">Email</label>
+          <input type="email" name="{{ signup_form.email.name }}" id="id_email_signup" required>
+        </div>
+        <div class="form-group">
+          <label for="id_password1_signup">Password</label>
+          <input type="password" name="{{ signup_form.password1.name }}" id="id_password1_signup" required>
+        </div>
+        <div class="form-group">
+          <label for="id_password2_signup">Confirm Password</label>
+          <input type="password" name="{{ signup_form.password2.name }}" id="id_password2_signup" required>
+        </div>
+        <button type="submit" name="signup_submit">Sign Up</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showLogin() {
+      document.getElementById('login-form').style.display = 'block';
+      document.getElementById('signup-form').style.display = 'none';
+      document.getElementById('login-tab').classList.add('active');
+      document.getElementById('signup-tab').classList.remove('active');
+    }
+    function showSignup() {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('signup-form').style.display = 'block';
+      document.getElementById('login-tab').classList.remove('active');
+      document.getElementById('signup-tab').classList.add('active');
+    }
+  </script>
+</body>
+</html>

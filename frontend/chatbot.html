@@ -1,0 +1,65 @@
+
+{% load static %}
+<div id="chat-container">
+    <div id="messages"></div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="Type your answer..." />
+        <button id="send-btn">Send</button>
+    </div>
+</div>
+
+<script>
+let step = 0;
+let answers = {};
+
+const questions = [
+    "👋 Hi! Can you tell me your age?",
+    "📚 What are you currently studying?",
+    "✨ What are your interests?",
+    "🎯 What do you want to become in the future?",
+    "📝 Have you ever done a project before?"
+];
+
+function addMessage(sender, text) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = sender === "bot" ? "bot-msg" : "user-msg";
+    msgDiv.innerText = text;
+    document.getElementById("messages").appendChild(msgDiv);
+}
+
+function askNextQuestion() {
+    if (step < questions.length) {
+        addMessage("bot", questions[step]);
+    } else {
+        addMessage("bot", "✅ Thanks! I’ve collected your details. Let’s proceed with recommendations.");
+        console.log("User details:", answers); // send to backend if needed
+    }
+}
+
+document.getElementById("send-btn").addEventListener("click", () => {
+    const input = document.getElementById("user-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage("user", text);
+    answers[questions[step]] = text;
+    step++;
+    input.value = "";
+
+    setTimeout(askNextQuestion, 500);
+});
+
+// Start the chatbot
+askNextQuestion();
+</script>
+
+<style>
+#chat-container { width: 100%; max-width: 700px; margin: auto; }
+#messages { padding: 15px; height: 400px; overflow-y: auto; border: 1px solid #ccc; border-radius: 8px; }
+.bot-msg { background: #f0f0f0; padding: 8px 12px; margin: 5px; border-radius: 8px; }
+.user-msg { background: #d4f7d4; padding: 8px 12px; margin: 5px; text-align: right; border-radius: 8px; }
+#input-area { display: flex; margin-top: 10px; }
+#user-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+#send-btn { padding: 10px 15px; background: green; color: white; border: none; border-radius: 8px; cursor: pointer; }
+</style>
+

@@ -1,0 +1,413 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Career Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body and layout */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* The main content area that gets pushed over by the sidebar */
+        .main-content-wrapper {
+            display: flex;
+            flex: 1;
+            transition: transform 0.3s ease-in-out;
+            will-change: transform;
+        }
+
+        /* This class will be added to the body to trigger the slide effect */
+        body.sidebar-open .main-content-wrapper {
+            transform: translateX(260px); /* Pushes the main content over */
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: linear-gradient(90deg, #6a85b6 0%, #bac8e0 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 101;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .profile-btn {
+            padding: 12px;
+            background-color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .profile-btn img {
+            height: 25px;
+            width: 25px;
+        }
+
+        /* Left Sidebar - now positioned outside the sliding content */
+        .left-sidebar {
+            width: 260px;
+            background-color: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transform: translateX(-100%); /* Initially off-screen */
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .left-sidebar.active {
+            transform: translateX(0); /* Slides into view */
+        }
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            color: #bac8e0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .sidebar-nav a:hover {
+            background-color: #3b3c3f;
+        }
+        .sidebar-footer-nav {
+            padding: 20px;
+            border-top: 1px solid #444;
+        }
+        .sidebar-footer-nav a {
+            display: block;
+            padding: 10px 0;
+            color: #bac8e0;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar-footer-nav a:hover {
+            color: white;
+        }
+
+        /* Right Dashboard */
+        .right-sidebar {
+            width: 280px;
+            background-color: #f0f0f5;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        .right-sidebar h2 {
+            font-size: 1.2rem;
+            color: #6a85b6;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* Main Content in the middle */
+        .main-content {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* Card styles */
+        .card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            cursor: pointer;
+            text-decoration: none;
+            color: #333;
+            position: relative;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1;
+            transition: background 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        .card:hover::before {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .card-content {
+            position: relative;
+            z-index: 2;
+        }
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .card p {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.5;
+        }
+        #career-guide-card {
+            background-image: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+        }
+        #quiz-card {
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        #college-compass-card {
+            background-image: linear-gradient(135deg, #ffc0cb 0%, #ff8c94 100%);
+        }
+        #passion-hub-card {
+            background-image: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        #brain-breaks-card {
+            background-image: linear-gradient(135deg, #c4e48b 0%, #90d5a3 100%);
+        }
+        #skill-up-card {
+            background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: #202123;
+            color: #bac8e0;
+            padding: 40px 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        footer .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+        footer h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        footer a {
+            color: #bac8e0;
+            text-decoration: none;
+            margin-bottom: 5px;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h1>Career Advisor</h1>
+        </div>
+        <a class="profile-btn" href="{% url 'user_profile' %}">
+            <img src="{% static 'images/user-icon.svg' %}" alt="User Profile Icon">
+        </a>
+    </header>
+
+    <div class="left-sidebar" id="left-sidebar">
+        <div class="sidebar-header">
+            <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{% url 'quiz_page' %}">Quiz</a>
+            <a href="{% url 'career_guide' %}">Career Guide</a>
+            <a href="#">Learning Plan</a>
+            <a href="#">College Compass</a>
+            <a href="#">Passion Hub</a>
+            <a href="#">Brain Breaks</a>
+            <a href="#">Skill Up</a>
+        </div>
+        <div class="sidebar-footer-nav">
+            <a href="#">Settings</a>
+            <a href="#">Help</a>
+            <a href="#">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-content-wrapper">
+        <div class="main-content">
+            <div class="container">
+                <a href="{% url 'career_guide' %}" class="card" id="career-guide-card">
+                    <div class="card-content">
+                        <h2>Career Guide</h2>
+                        <p>Get personalized career guidance with our chatbot.</p>
+                    </div>
+                </a>
+                <a href="{% url 'quiz_page' %}" class="card" id="quiz-card">
+                    <div class="card-content">
+                        <h2>Quiz</h2>
+                        <p>Test your skills and discover suitable career paths.</p>
+                    </div>
+                </a>
+                <a href="#" class="card">
+                    <div class="card-content">
+                        <h2>Learning Plan</h2>
+                        <p>Get a personalized roadmap to achieve your career goals.</p>
+                    </div>
+                </a>
+                <a href="#" class="card" id="college-compass-card">
+                    <div class="card-content">
+                        <h2>College Compass</h2>
+                        <p>Navigate your way to the perfect college.</p>
+                    </div>
+                </a>
+                <a href="#" class="card" id="passion-hub-card">
+                    <div class="card-content">
+                        <h2>Passion Hub</h2>
+                        <p>Explore your interests beyond the classroom.</p>
+                    </div>
+                </a>
+                <a href="#" class="card" id="brain-breaks-card">
+                    <div class="card-content">
+                        <h2>Brain Breaks</h2>
+                        <p>Take a break and recharge with fun games.</p>
+                    </div>
+                </a>
+                <a href="#" class="card" id="skill-up-card">
+                    <div class="card-content">
+                        <h2>Skill Up</h2>
+                        <p>Find courses to boost your knowledge and abilities.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="right-sidebar">
+            <h2>Your Dashboard</h2>
+            <p>Welcome back! This is where you'll see your recent activity and progress at a glance.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-section">
+            <h3>About Career Advisor</h3>
+            <p>Your guide to a brighter professional future.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Contact Us</h3>
+            <p>Email: <a href="mailto:info@careeradvisor.com">info@careeradvisor.com</a></p>
+            <p>Phone: (123) 456-7890</p>
+        </div>
+        <div class="footer-section">
+            <h3>Quick Links</h3>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; <span id="current-year"></span> Career Advisor. All Rights Reserved. | <span id="current-time"></span></p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleSidebar() {
+            const body = document.body;
+            const sidebar = document.getElementById('left-sidebar');
+            body.classList.toggle('sidebar-open');
+            sidebar.classList.toggle('active');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('current-year').textContent = year;
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // Update the time every second
+        setInterval(updateTime, 1000);
+        
+        // Initial call to set the time immediately
+        updateTime();
+    </script>
+</body>
+</html>

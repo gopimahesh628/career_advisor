@@ -1,0 +1,565 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Career Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        /* General body and layout */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eef5ff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; /* Ensures body is at least the viewport height */
+        }
+
+        /* The container for the left sidebar and chat area */
+        .main-content-area {
+            display: flex;
+            flex: 1; /* Allows this container to grow and push the footer down */
+            min-height: 1px; /* Required for some browsers to allow flex item to shrink */
+        }
+        
+        /* The main content area that gets pushed over by the sidebar */
+        .main-content-wrapper {
+            display: flex;
+            flex: 1;
+            transition: transform 0.3s ease-in-out;
+            will-change: transform;
+        }
+
+        /* This class will be added to the body to trigger the slide effect */
+        body.sidebar-open .main-content-wrapper {
+            transform: translateX(260px); /* Pushes the main content over */
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: linear-gradient(90deg, #6a85b6 0%, #bac8e0 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 101;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .profile-btn {
+            padding: 12px;
+            background-color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        .profile-btn img {
+            height: 25px;
+            width: 25px;
+        }
+
+        /* Left Sidebar - now positioned outside the sliding content */
+        .left-sidebar {
+            width: 260px;
+            background-color: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transform: translateX(-100%); /* Initially off-screen */
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .left-sidebar.active {
+            transform: translateX(0); /* Slides into view */
+        }
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+        .sidebar-nav a {
+            display: block;
+            padding: 15px 20px;
+            color: #bac8e0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .sidebar-nav a:hover {
+            background-color: #3b3c3f;
+        }
+        .sidebar-footer-nav {
+            padding: 20px;
+            border-top: 1px solid #444;
+        }
+        .sidebar-footer-nav a {
+            display: block;
+            padding: 10px 0;
+            color: #bac8e0;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar-footer-nav a:hover {
+            color: white;
+        }
+
+        /* Footer styles */
+        footer {
+            background-color: #202123;
+            color: #bac8e0;
+            padding: 40px 50px;
+            font-size: 0.9rem;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        footer .footer-section {
+            display: flex;
+            flex-direction: column;
+        }
+        footer h3 {
+            color: white;
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        footer a {
+            color: #bac8e0;
+            text-decoration: none;
+            margin-bottom: 5px;
+            transition: color 0.2s;
+        }
+        footer a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            width: 100%;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            padding-top: 20px;
+        }
+
+        /* Chat area styles */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        .chat-box {
+            flex: 1; /* Allows chat box to grow and take all space */
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .message {
+            margin: 10px 0;
+            max-width: 70%;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .user-message {
+            background-color: #DCF8C6;
+            align-self: flex-end;
+        }
+        .bot-message {
+            background-color: #f1f0f0;
+            align-self: flex-start;
+        }
+        .input-area {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ccc;
+            background-color: #fafafa;
+        }
+        .input-area textarea {
+            flex: 1;
+            resize: none;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 14px;
+        }
+        .input-area button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .input-area button:hover {
+            background-color: #45a049;
+        }
+        .chat-history {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .chat-item {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .chat-item:hover {
+            background-color: #3b3c3f;
+        }
+        .sidebar-bottom {
+            padding: 10px;
+            border-top: 1px solid #444;
+        }
+        .sidebar-bottom button {
+            width: 100%;
+            margin: 5px 0;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3b3c3f;
+            color: white;
+            cursor: pointer;
+        }
+        .sidebar-bottom button:hover {
+            background-color: #5a5b5e;
+        }
+        .sidebar-top {
+            padding: 15px;
+            border-bottom: 1px solid #444;
+        }
+        .sidebar-top button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3b3c3f;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .sidebar-top button:hover {
+            background-color: #5a5b5e;
+        }
+        .sidebar {
+            width: 260px;
+            background-color: #202123;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <h1>Career Advisor</h1>
+        </div>
+        <a class="profile-btn" href="{% url 'user_profile' %}">
+            <img src="{% static 'images/user-icon.svg' %}" alt="User Profile Icon">
+        </a>
+    </header>
+
+    <div class="left-sidebar" id="left-sidebar">
+        <div class="sidebar-header">
+            <button class="close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <div class="sidebar-nav">
+            <a href="{% url 'quiz_page' %}">Quiz</a>
+            <a href="{% url 'career_guide' %}">Career Guide</a>
+            <a href="#">Learning Plan</a>
+            <a href="#">College Compass</a>
+            <a href="#">Passion Hub</a>
+            <a href="#">Brain Breaks</a>
+            <a href="#">Skill Up</a>
+        </div>
+        <div class="sidebar-footer-nav">
+            <a href="#">Settings</a>
+            <a href="#">Help</a>
+            <a href="#">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-content-area">
+        <div class="sidebar">
+            <div class="sidebar-top">
+                <button onclick="newChat()">+ New Chat</button>
+            </div>
+            <div class="chat-history" id="chatHistory"></div>
+            <div class="sidebar-bottom">
+                <button onclick="toggleMode()" id="toggleBtn">💡 Switch to Q&S Chat</button>
+                <button>⚙️ Settings</button>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-box" id="chatBox"></div>
+            <div class="input-area">
+                <textarea id="userInput" placeholder="Type your message..."></textarea>
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSessionId = null;
+        let isChatbotMode = true; // default = chatbot
+        let chatbotStep = 0;
+        let userProfile = { age: "", study: "", interests: "", goal: "", project: "" };
+
+        function toggleMode() {
+            isChatbotMode = !isChatbotMode;
+            document.getElementById("chatBox").innerHTML = "";
+            document.getElementById("userInput").value = "";
+            document.getElementById("toggleBtn").textContent =
+                isChatbotMode ? "💡 Switch to Q&S Chat" : "🤖 Switch to Chatbot";
+
+            if (isChatbotMode) {
+                newChat();
+            } else {
+                appendMessage("💬 Q&S Chat enabled. Ask me anything!", "bot");
+                loadChats();
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const chatBox = document.getElementById("chatBox");
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("message", sender === "user" ? "user-message" : "bot-message");
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("userInput");
+            const message = input.value.trim();
+            if (!message) return;
+
+            appendMessage(message, "user");
+            input.value = "";
+
+            if (isChatbotMode) {
+                handleChatbotFlow(message);
+            } else {
+                handleQSFlow(message);
+            }
+        }
+
+        // Guided Chatbot Flow with Quiz
+        function handleChatbotFlow(userMsg) {
+            userMsg = userMsg.toLowerCase();
+
+            // If user is unsure about interests
+            if (chatbotStep === 2 && (userMsg.includes("don’t know") || userMsg.includes("not sure") || userMsg.includes("confused"))) {
+                appendMessage("🤔 Seems like you’re unsure about your interests. Would you like to take a quick quiz to find out?", "bot");
+                chatbotStep = "quiz_suggested";
+                return;
+            }
+
+            // Quiz suggestion flow
+            if (chatbotStep === "quiz_suggested") {
+                if (userMsg.includes("yes")) {
+                    window.location.href = "{% url 'quiz' %}";
+                } else {
+                    appendMessage("No problem 👍 Let’s continue without quiz. So, what do you want to become?", "bot");
+                    chatbotStep = 3;
+                }
+                return;
+            }
+
+            // Normal guided steps
+            switch (chatbotStep) {
+                case 0:
+                    userProfile.age = userMsg;
+                    appendMessage("Great! What are you currently studying?", "bot");
+                    chatbotStep++;
+                    break;
+                case 1:
+                    userProfile.study = userMsg;
+                    appendMessage("Nice. What are your interests?", "bot");
+                    chatbotStep++;
+                    break;
+                case 2:
+                    userProfile.interests = userMsg;
+                    appendMessage("What do you want to become in the future?", "bot");
+                    chatbotStep++;
+                    break;
+                case 3:
+                    userProfile.goal = userMsg;
+                    appendMessage("Have you ever done a project before?", "bot");
+                    chatbotStep++;
+                    break;
+                case 4:
+                    userProfile.project = userMsg;
+                    appendMessage("✅ Thanks! I’ve gathered your details. This will help me guide your career path.", "bot");
+                    chatbotStep++;
+                    break;
+            }
+        }
+
+        // Q&S Free Chat Flow
+        function handleQSFlow(message) {
+            fetch("/api/recommend/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "X-CSRFToken": getCSRFToken() },
+                body: JSON.stringify({ message: message, session_id: currentSessionId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                currentSessionId = data.session_id;
+                appendMessage(data.reply, "bot");
+                loadChats();
+            });
+        }
+
+        function loadChats() {
+            if (isChatbotMode) return;
+            fetch("/api/chats/")
+                .then(res => res.json())
+                .then(data => {
+                    const historyDiv = document.getElementById("chatHistory");
+                    historyDiv.innerHTML = "";
+                    data.sessions.forEach(s => {
+                        const div = document.createElement("div");
+                        div.classList.add("chat-item");
+                        div.textContent = s.title;
+                        div.onclick = () => loadChatHistory(s.id);
+
+                        const delBtn = document.createElement("span");
+                        delBtn.textContent = " ❌";
+                        delBtn.style.cursor = "pointer";
+                        delBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteChat(s.id);
+                        };
+
+                        div.appendChild(delBtn);
+                        historyDiv.appendChild(div);
+                    });
+                });
+        }
+
+        function deleteChat(sessionId) {
+            fetch(`/api/chats/${sessionId}/delete/`, { method: "DELETE" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadChats();
+                    document.getElementById("chatBox").innerHTML = "";
+                }
+            });
+        }
+
+        function loadChatHistory(sessionId) {
+            currentSessionId = sessionId;
+            fetch(`/api/chats/${sessionId}/`)
+                .then(res => res.json())
+                .then(data => {
+                    const chatBox = document.getElementById("chatBox");
+                    chatBox.innerHTML = "";
+                    data.messages.forEach(m => appendMessage(m.text, m.sender));
+                });
+        }
+
+        function newChat() {
+            if (isChatbotMode) {
+                chatbotStep = 0;
+                document.getElementById("chatBox").innerHTML = "";
+                appendMessage("👋 Hi! Let's get to know you. What’s your age?", "bot");
+            } else {
+                fetch("/api/chats/new/", { method: "POST", headers: { "X-CSRFToken": getCSRFToken() } })
+                    .then(res => res.json())
+                    .then(data => {
+                        currentSessionId = data.session_id;
+                        document.getElementById("chatBox").innerHTML = "";
+                        loadChats();
+                    });
+            }
+        }
+
+        function getCSRFToken() {
+            const name = "csrftoken";
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + "=")) {
+                    return decodeURIComponent(cookie.substring(name.length + 1));
+                }
+            }
+            return "";
+        }
+
+        function toggleSidebar() {
+            const body = document.body;
+            const sidebar = document.getElementById('left-sidebar');
+            body.classList.toggle('sidebar-open');
+            sidebar.classList.toggle('active');
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('current-year').textContent = year;
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        // On load → default chatbot
+        window.onload = () => {
+            newChat();
+            updateTime();
+            setInterval(updateTime, 1000);
+        };
+    </script>
+</body>
+</html>
